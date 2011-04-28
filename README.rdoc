@@ -1,10 +1,10 @@
 = EnumField
 
-Macro to emulate a MySQL enum_field type thing.
+Macro to help with enumerations in an Active Record column.
 
 == Usage
 
-This plugin encapsulates a validates_inclusion_of and automatically gives you a 
+This gem encapsulates a validates_inclusion_of and automatically gives you a 
 few more goodies automatically. That's it!
 
     class Computer < ActiveRecord:Base
