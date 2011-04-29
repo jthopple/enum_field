@@ -44,6 +44,8 @@ module EnumField
         define_method("#{prefix}#{method_name}?") do
           self.send(field) == value
         end
+      
+        scope method_name.to_sym, where({ field.to_sym => value })
       end
       
       unless const_defined?(field.to_s.pluralize.upcase)

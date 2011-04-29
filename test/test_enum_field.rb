@@ -3,6 +3,10 @@ require 'helper'
 class MockedModel; include EnumField; end;
 
 class TestEnumField < Test::Unit::TestCase
+  def teardown
+    Person.delete_all
+  end
+  
   context "with a simple gender enum on Person model" do  
     should "create constant with possible values named as pluralized field" do
       assert_equal %w(Male Female), Person::GENDERS
@@ -33,11 +37,24 @@ class TestEnumField < Test::Unit::TestCase
       model.gender = nil
       assert !model.valid?
     end
+    
+    should "respond to scope" do
+      Person.create([
+        { :gender => "Male"}, 
+        { :gender => "Male"}, 
+        { :gender => "Female"} 
+      ])
+      
+      assert_equal 2, Person.male.count
+      assert_equal 1, Person.female.count
+    end
   end
 
   context "With an enum containing multiple word choices" do
     setup do
       MockedModel.stubs(:validates_inclusion_of)
+      MockedModel.stubs(:where)
+      MockedModel.stubs(:scope)
       MockedModel.send :enum_field, :field, ['choice one', 'choice-two', 'other']
       @model = MockedModel.new
     end
@@ -54,6 +71,8 @@ class TestEnumField < Test::Unit::TestCase
   context "With an enum containing mixed case choices" do
     setup do
       MockedModel.stubs(:validates_inclusion_of)
+      MockedModel.stubs(:where)
+      MockedModel.stubs(:scope)
       MockedModel.send :enum_field, :field, ['Choice One', 'ChoiceTwo', 'Other']
       @model = MockedModel.new
     end
@@ -78,6 +97,8 @@ class TestEnumField < Test::Unit::TestCase
   context "With a prefix option" do
     setup do
       MockedModel.stubs(:validates_inclusion_of)
+      MockedModel.stubs(:scope)
+      MockedModel.stubs(:where)
     end
     
     should "define prefixed query methods" do
