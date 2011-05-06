@@ -1,6 +1,6 @@
 require 'helper'
 
-class MockedModel; include EnumField; end;
+class MockedModel; extend EnumField; end;
 
 class TestEnumField < Test::Unit::TestCase
   def teardown
