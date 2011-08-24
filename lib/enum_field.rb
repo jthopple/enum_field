@@ -24,28 +24,17 @@ module EnumField
   #   - out_of_this_world?
   # - define the STATUSES constant, which contains the acceptable values
   def enum_field(field, possible_values, options={})     
-    prefix = EnumField.prefix(field, options)
+    prefix = prefix(field, options)
     
     possible_values.each do |value|
-      EnumField.check_value(value) 
-      method_name = EnumField.methodize_value(value)
-
-      name = "#{prefix}#{method_name}"
-      const = name.upcase
-      unless const_defined?(const)
-        const_set const, value 
-      end
-      
-      define_method("#{prefix}#{method_name}?") do
-        self.send(field) == value
-      end
-    
+      verify_format(value) 
+      method_name = methodize_value(value, prefix)
+      define_value_constant(method_name, value)
+      define_query_method(field, method_name, value)
       scope method_name.to_sym, where({ field.to_sym => value })
     end
     
-    unless const_defined?(field.to_s.pluralize.upcase)
-      const_set field.to_s.pluralize.upcase, possible_values 
-    end
+    define_values_constant(field, possible_values)
     
     validates_inclusion_of field, 
       :in => possible_values, 
@@ -55,19 +44,39 @@ module EnumField
   end
   
   private
-    def self.prefix(field, options)
+    def prefix(field, options)
       prefix = options[:prefix]
+      return nil if prefix == false
       prefix && "#{prefix == true ? field : prefix}_"
     end
 
-    def self.check_value(value)
+    def verify_format(value)
       if value.to_s !~ /^[\w\s_-]*$/
         raise ArgumentError.new("Invalid enum value: #{value}")
       end
     end
     
-    def self.methodize_value(value)
-      value.downcase.gsub(/[-\s]/, '_')
+    def methodize_value(value, prefix)
+      "#{prefix}#{value.downcase.gsub(/[-\s]/, '_')}"
+    end
+    
+    def define_value_constant(method_name, value)
+      const = method_name.upcase
+      unless const_defined?(const)
+        const_set const, value 
+      end
+    end
+    
+    def define_query_method(field, method_name, value)
+      define_method("#{method_name}?") do
+        self.send(field) == value
+      end
+    end
+    
+    def define_values_constant(field, values)
+      unless const_defined?(field.to_s.pluralize.upcase)
+        const_set field.to_s.pluralize.upcase, values 
+      end
     end
 end
 
