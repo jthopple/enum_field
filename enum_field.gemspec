@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{enum_field}
-  s.version = "0.3.5"
+  s.version = "0.3.6"
 
   s.required_rubygems_version = ">= 1.3.6"
   s.authors = ["James Golick", "Mathieu Martin", "Jeremy Hopple"]
